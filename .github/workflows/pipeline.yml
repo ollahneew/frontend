@@ -9,9 +9,9 @@ on:
 
 # Set environment variables
 env:
-  REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
-  REACT_APP_FB_ID: ${{ secrets.REACT_APP_FB_ID }}
-  REACT_APP_IS_LOCAL: ${{ secrets.REACT_APP_IS_LOCAL }}
+  REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
+  REACT_APP_FB_ID: ${{ vars.REACT_APP_FB_ID }}
+  REACT_APP_IS_LOCAL: ${{ vars.REACT_APP_IS_LOCAL }}
 
 # This is the workflow that is being run.
 jobs:
