@@ -9,7 +9,7 @@ on:
 
 # This is the workflow that is being run.
 jobs:
-  build-and-deploy:
+  build-and-test:
     # This is telling GitHub to run the workflow on the latest version of Ubuntu.
     runs-on: ubuntu-latest
     steps:
@@ -43,6 +43,10 @@ jobs:
         run: |
           docker push ollah/ecomerce:client-${{github.run_number}}
    # Job 2: Deploy to server
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to server
        # Use "appleboy/ssh-action" to deploy the image to the server via SSH
         uses: appleboy/ssh-action@v0.1.3
