@@ -68,21 +68,22 @@ const PaymentPage = () => {
 
   const priceDiscountMemo = useMemo(() => {
     const result = order?.orderItemsSlected?.reduce((total, cur) => {
-      const totalDiscount = cur.discount ? cur.discount : 0
-      return total + (priceMemo * (totalDiscount  * cur.amount) / 100)
-    },0)
-    if(Number(result)){
-      return result
+      const itemPrice = cur.price ? cur.price : 0; // Assuming each item has a 'price' property
+      const totalDiscount = cur.discount ? cur.discount : 0;
+      return total + (itemPrice * totalDiscount * cur.amount / 100);
+    }, 0);
+    if (Number(result)) {
+      return result;
     }
-    return 0
-  },[order])
+    return 0;
+  }, [order]);
 
   const diliveryPriceMemo = useMemo(() => {
-    if(priceMemo > 200000){
+    if(priceMemo >= 20000 && priceMemo < 500000){
       return 10000
-    }else if(priceMemo === 0 ){
+    }else if(priceMemo >= 500000 || order?.orderItemsSlected?.length === 0) {
       return 0
-    }else {
+    } else {
       return 20000
     }
   },[priceMemo])
@@ -231,6 +232,26 @@ const PaymentPage = () => {
     }
     document.body.appendChild(script)
   }
+  const createOrder = (data, actions) => {
+    return actions.order.create({
+      purchase_units: [
+        {
+          description: "Your Order",
+          amount: {
+            currency_code: "USD",
+            value: Math.round(totalPriceMemo / 23000),
+          },
+        },
+      ],
+    });
+  }
+  
+  const onApproveOrder = (data,actions) => {
+    return actions.order.capture().then((details) => {
+      const { payer } = details;
+      onSuccessPaypal(details, data);
+    });
+  }
 
   useEffect(() => {
     if(!window.paypal) {
@@ -299,9 +320,10 @@ const PaymentPage = () => {
               </div>
               {payment === 'paypal' && sdkReady ? (
                 <div style={{width: '320px'}}>
-                  <PayPalScriptProvider>
+                  <PayPalScriptProvider options={{ "client-id": PaymentService.getConfig() }}>
                   <PayPalButtons
-                    amount={Math.round(totalPriceMemo / 30000)}
+                    createOrder={(data, actions) => createOrder(data, actions)}
+                    onApprove={(data, actions) => onApproveOrder(data, actions)}
                     // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
                     onSuccess={onSuccessPaypal}
                     onError={() => {
